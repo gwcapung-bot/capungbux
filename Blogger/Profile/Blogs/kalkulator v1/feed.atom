@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:blogger='http://schemas.google.com/blogger/2018'>
+  <id>tag:blogger.com,1999:blog-2750379106230239887</id>
+  <title>kalkulator v1</title>
+  <entry>
+    <id>tag:blogger.com,1999:blog-2750379106230239887.post-3164881611109870732</id>
+    <blogger:type>POST</blogger:type>
+    <blogger:status>LIVE</blogger:status>
+    <author>
+      <name>EDUCATION</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title/>
+    <content type='html'>&lt;div style="text-align: center; width: 100%;"&gt;
+  &lt;iframe scrolling="no" src="https://script.google.com/macros/s/AKfycbwC0Ac6JvvjwQSZD2yTlE00J8jMvKiYn1WWyGhhq4nUi8RrYiOITz9soJyio5pmDDTSaQ/exec" style="border: none; height: 450px; max-width: 360px; width: 100%;"&gt;&lt;/iframe&gt;
+&lt;/div&gt;</content>
+    <blogger:metaDescription/>
+    <blogger:created>2026-06-17T07:40:05.979Z</blogger:created>
+    <published>2026-06-17T07:41:44.094Z</published>
+    <updated>2026-06-18T04:34:15.534Z</updated>
+    <blogger:location/>
+    <category/>
+    <blogger:filename>/2026/06/blog-post.html</blogger:filename>
+    <link/>
+    <enclosure/>
+    <blogger:trashed/>
+  </entry>
+  <entry>
+    <id>tag:blogger.com,1999:blog-2750379106230239887.post-7602092998869611397</id>
+    <blogger:type>PAGE</blogger:type>
+    <blogger:status>LIVE</blogger:status>
+    <author>
+      <name>EDUCATION</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title>Kalkulator</title>
+    <content type='html'>exec&lt;iframe src="https://script.google.com/macros/s/AKfycbwC0Ac6JvvjwQSZD2yTlE00J8jMvKiYn1WWyGhhq4nUi8RrYiOITz9soJyio5pmDDTSaQ/exec" width="100%" height="450px"&gt;&lt;/iframe&gt;</content>
+    <blogger:metaDescription/>
+    <blogger:created>2026-06-17T07:42:37.959Z</blogger:created>
+    <published>2026-06-17T07:43:15.850Z</published>
+    <updated>2026-06-18T04:32:14.962Z</updated>
+    <blogger:location/>
+    <category/>
+    <blogger:filename>/p/kalkulator.html</blogger:filename>
+    <link/>
+    <enclosure/>
+    <blogger:trashed/>
+  </entry>
+  <entry>
+    <id>tag:blogger.com,1999:blog-2750379106230239887.post-9123778334539109293</id>
+    <blogger:type>POST</blogger:type>
+    <blogger:status>DRAFT</blogger:status>
+    <author>
+      <name>EDUCATION</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title/>
+    <content type='html'/>
+    <blogger:metaDescription/>
+    <blogger:created>2026-06-17T07:38:04.680Z</blogger:created>
+    <published>2026-06-17T07:38:04.680Z</published>
+    <updated>2026-06-17T07:38:04.680Z</updated>
+    <blogger:location/>
+    <category/>
+    <blogger:filename/>
+    <link/>
+    <enclosure/>
+    <blogger:trashed/>
+  </entry>
+</feed>
