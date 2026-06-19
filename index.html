@@ -1,1 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARK H.U.D. - Tactical Running System</title>
+    <style>
+        :root {
+            --hud-cyan: #00f0ff;
+            --hud-red: #ff2a2a;
+            --hud-gold: #ffbe00;
+            --hud-bg: rgba(5, 15, 25, 0.85);
+            --hud-glow: 0 0 12px rgba(0, 240, 255, 0.6);
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #02080e;
+            color: var(--hud-cyan);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Efek Garis Scan Elektronik */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        @keyframes scanline {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        .scanline-effect {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(0, 240, 255, 0.04) 10%, rgba(255,255,255,0) 20%);
+            animation: scanline 6s linear infinite;
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--hud-cyan);
+            padding-bottom: 10px;
+            text-shadow: var(--hud-glow);
+            z-index: 5;
+        }
+
+        .system-status {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85rem;
+        }
+
+        .blink {
+            animation: blinker 1.5s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.2; }
+        }
+
+        /* Layout Grid HUD */
+        .hud-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            height: 75vh;
+            margin: 15px 0;
+            z-index: 5;
+        }
+
+        .hud-panel {
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-cyan);
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .center-hud {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #arcCanvas {
+            max-width: 100%;
+            max-height: 280px;
+        }
+
+        .telemetry-display {
+            text-align: center;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .main-stat {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px var(--hud-cyan);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(0, 240, 255, 0.3);
+            padding: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            border-left: 3px solid var(--hud-cyan);
+            padding-left: 8px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        button {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--hud-cyan);
+            color: var(--hud-cyan);
+            padding: 12px 30px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            box-shadow: var(--hud-glow);
+        }
+
+        button:hover {
+            background: var(--hud-cyan);
+            color: #000;
+            box-shadow: 0 0 25px var(--hud-cyan);
+        }
+
+        button.active-run {
+            border-color: var(--hud-red);
+            color: var(--hud-red);
+            box-shadow: 0 0 12px rgba(255, 42, 42, 0.4);
+        }
+        button.active-run:hover {
+            background: var(--hud-red);
+            color: #fff;
+        }
+
+        .terminal-log {
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.4);
+            padding: 8px;
+            height: 110px;
+            overflow-y: hidden;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            color: rgba(0, 240, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanline-effect"></div>
+
+    <header>
+        <div>STARK INDUSTRIES // OS v9.42</div>
+        <div class="system-status">
+            <div>GPS: <span style="color: #00ff00;">TERHUBUNG</span></div>
+            <div>SISTEM ZIRAH: <span class="blink" style="color: var(--hud-gold);">MARK LXXXV</span></div>
+        </div>
+    </header>
+
+    <div class="hud-container">
+        <!-- Panel Kiri: Biometrik -->
+        <div class="hud-panel">
+            <div>
+                <div class="panel-title">MATRIKS BIOMETRIK</div>
+                <div class="stat-row">
+                    <span>DETAK JANTUNG</span>
+                    <span class="stat-value" id="heartRate">132 BPM</span>
+                </div>
+                <div class="stat-row">
+                    <span>KADENS STEP</span>
+                    <span class="stat-value">168 SPM</span>
+                </div>
+                <div class="stat-row">
+                    <span>KALORI TERBAKAR</span>
+                    <span class="stat-value" id="calories">142 KCAL</span>
+                </div>
+            </div>
+            <div>
+                <div class="panel-title">MISI AKTIF</div>
+                <div style="font-size: 0.8rem; color: #fff; line-height: 1.4;">
+                    SABOTASE DRONE HAMMER IND. Hadang drone liar sebelum masuk batas kota. Jaga pace di atas 5'30".
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Tengah: Arc Reactor & Jarak -->
+        <div class="hud-panel center-hud">
+            <canvas id="arcCanvas" width="300" height="300"></canvas>
+            <div class="telemetry-display">
+                <div class="main-stat" id="distanceDisplay">0.00</div>
+                <div style="font-size: 0.8rem; letter-spacing: 4px;">JARAK TOTAL (KM)</div>
+            </div>
+        </div>
+
+        <!-- Panel Kanan: Telemetri Setelan -->
+        <div class="hud-panel">
+            <div>
+                <div class="panel-title">MEKANIKA FLIGHT</div>
+                <div class="stat-row">
+                    <span>PACE SAAT INI</span>
+                    <span class="stat-value" id="paceDisplay">0'00"</span>
+                </div>
+                <div class="stat-row">
+                    <span>KECEPATAN</span>
+                    <span class="stat-value" id="speedDisplay">0.0 KM/H</span>
+                </div>
+                <div class="stat-row">
+                    <span>DAYA ARC REACTOR</span>
+                    <span class="stat-value" id="arcPowerDisplay">34%</span>
+                </div>
+            </div>
+            <div>
+                <div class="panel-title">LOG KOMUNIKASI AI</div>
+                <div class="terminal-log" id="aiTerminal">
+                    [JARVIS]: Sistem selesai booting. Menunggu aktivasi pendorong, Sir.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="actionBtn" onclick="toggleRunSimulation()">AKTIFKAN PENDORONG</button>
+    </div>
+
+    <script>
+        let trackingActive = false;
+        let distance = 0.0;
+        let elapsedSeconds = 0;
+        let arcPower = 34;
+        let runInterval;
+
+        const canvas = document.getElementById('arcCanvas');
+        const ctx = canvas.getContext('2d');
+        let angleOffset = 0;
+
+        // Render Animasi Arc Reactor lingkaran berputar
+        function drawArcReactor() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            angleOffset += trackingActive ? 0.04 : 0.01;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, 110, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angleOffset);
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.arc(0, 0, 95, (i * Math.PI / 4), (i * Math.PI / 4) + 0.4);
+                ctx.strokeStyle = '#00f0ff';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            let pulseRadius = 40 + Math.sin(Date.now() * 0.005) * 3;
+            ctx.beginPath();
+            ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
+            ctx.fill();
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00f0ff';
+            ctx.fill();
+        }
+
+        // Simulasi ketika tombol lari ditekan
+function toggleRunSimulation() {
+    const btn = document.getElementById('actionBtn');
+    
+    // Ambil total XP yang sudah tersimpan di browser sebelumnya (kalau belum ada, set jadi 0)
+    let totalXP = parseInt(localStorage.getItem('stark_total_xp')) || 0;
+    
+    if (!trackingActive) {
+        trackingActive = true;
+        btn.innerText = "MATIKAN SISTEM";
+        btn.classList.add('active-run');
+        updateLog("[JARVIS]: Pendorong 100%. Jalur audio aman. Selamat berlari, Sir.");
+        
+        runInterval = setInterval(() => {
+            elapsedSeconds++;
+            distance += 0.0035; 
+            arcPower = Math.min(100, arcPower + 1);
+            
+            let simulatedBPM = Math.floor(135 + Math.sin(elapsedSeconds * 0.1) * 7);
+            let simulatedKcal = Math.floor(elapsedSeconds * 0.25);
+            
+            document.getElementById('distanceDisplay').innerText = distance.toFixed(2);
+            document.getElementById('heartRate').innerText = simulatedBPM + " BPM";
+            document.getElementById('calories').innerText = simulatedKcal + " KCAL";
+            document.getElementById('arcPowerDisplay').innerText = arcPower + "%";
+            document.getElementById('paceDisplay').innerText = "5'12\"";
+            document.getElementById('speedDisplay').innerText = "11.5 KM/H";
+
+            if (elapsedSeconds === 8) {
+                updateLog("[JARVIS]: Peringatan: Sensor mendeteksi Drone Hammer mendekat dari belakang. Tambah kecepatan Anda!");
+            }
+        }, 1000);
+    } else {
+        trackingActive = false;
+        btn.innerText = "AKTIFKAN PENDORONG";
+        btn.classList.remove('active-run');
+        clearInterval(runInterval);
+        updateLog("[JARVIS]: Sesi lari dihentikan. Memproses data telemetri zirah...");
+
+        // 1. HITUNG XP PAKAI FORMULA STARK LANGSUNG DI JAVASCRIPT
+        let xpEarned = Math.floor((distance * 1000) + (elapsedSeconds * 0.5));
+        
+        // 2. TAMBAHKAN KE TOTAL XP DAN SIMPAN KE LOCALSTORAGE
+        totalXP += xpEarned;
+        localStorage.setItem('stark_total_xp', totalXP);
+
+        // 3. UPDATE TAMPILAN HUD
+        document.getElementById('arcPowerDisplay').innerText = totalXP + " XP"; // Kita pinjam box ini buat pajang total XP
+        
+        updateLog(`[JARVIS]: Data berhasil disimpan ke penyimpanan lokal. Sir mendapatkan +${xpEarned} XP! Total XP Akumulasi: ${totalXP} XP.`);
+        
+        // Reset variabel lari untuk sesi berikutnya
+        distance = 0.0;
+        elapsedSeconds = 0;
+    }
+}
+
+        function updateLog(message) {
+            const terminal = document.getElementById('aiTerminal');
+            terminal.innerHTML = `<div>${message}</div><br>` + terminal.innerHTML;
+        }
+
+        setInterval(drawArcReactor, 30);
+    </script>
+</body>
+</html>
